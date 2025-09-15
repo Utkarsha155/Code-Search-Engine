@@ -38,7 +38,6 @@ const About = () => {
   return (
     <div className="min-h-screen gradient-bg py-12 px-6">
       <div className="max-w-6xl mx-auto fade-in">
-        {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent mb-6">
             About CodeSearchEngine
@@ -49,7 +48,6 @@ const About = () => {
           </p>
         </div>
 
-        {/* Features Grid */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-white text-center mb-12">Key Features</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -68,7 +66,6 @@ const About = () => {
         </div>
 
 
-        {/* Call to Action */}
         <div className="text-center mt-16">
           <h3 className="text-2xl font-bold text-white mb-4">Ready to get started?</h3>
           <p className="text-gray-300 mb-6">Try searching your codebase now and experience the power of fast, accurate code search.</p>

@@ -39,20 +39,18 @@ function History() {
     };
 
     const formatTime = (timeString) => {
-        const date = new Date(timeString);
-        const now = new Date();
-        const diffInHours = (now - date) / (1000 * 60 * 60);
-        
-        if (diffInHours < 1) {
-            return 'Just now';
-        } else if (diffInHours < 24) {
-            return `${Math.floor(diffInHours)}h ago`;
-        } else if (diffInHours < 168) {
-            return `${Math.floor(diffInHours / 24)}d ago`;
-        } else {
-            return date.toLocaleDateString();
-        }
-    };
+    const date = new Date(timeString);
+    return date.toLocaleString(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+};
+
 
     const getResultCount = (entry) => {
         try {
@@ -166,8 +164,7 @@ function History() {
                                                     </svg>
                                                     {formatTime(entry.time)}
                                                 </div>
-                                                <span>•</span>
-                                                <span>{entry.time}</span>
+                                                
                                             </div>
                                         </div>
                                         <button 

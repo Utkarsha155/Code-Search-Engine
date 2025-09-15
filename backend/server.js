@@ -2,17 +2,40 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+const codebaseDir = path.join(__dirname, '../codebase');
+
+if (!fs.existsSync(codebaseDir)) {
+    fs.mkdirSync(codebaseDir, { recursive: true });
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Search API - Search through codebase files
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, codebaseDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname); 
+    }
+});
+const upload = multer({ storage });
+
+app.post('/api/upload', upload.array('files'), (req, res) => {
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ success: false, message: 'No files uploaded' });
+    }
+    res.json({ success: true, message: `${req.files.length} files uploaded` });
+});
+
+
 app.get('/search', (req, res) => {
     const query = req.query.q;
     if (!query) {
@@ -20,7 +43,6 @@ app.get('/search', (req, res) => {
     }
 
     const results = [];
-    const codebaseDir = path.join(__dirname, '../codebase');
 
     try {
         const files = fs.readdirSync(codebaseDir);
@@ -53,9 +75,7 @@ app.get('/search', (req, res) => {
     res.json({ results: results.slice(0, 10) });
 });
 
-// Codebase API - Get all files and their content
 app.get('/api/codebase', (req, res) => {
-    const codebaseDir = path.join(__dirname, '../codebase');
     const files = [];
 
     try {
@@ -81,7 +101,6 @@ app.get('/api/codebase', (req, res) => {
     res.json(files);
 });
 
-// Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
@@ -90,22 +109,36 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ 
-        success: false, 
-        message: 'Something went wrong!' 
+app.delete('/api/delete/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = path.join(codebaseDir, filename);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+    }
+
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error("Error deleting file:", err);
+            return res.status(500).json({ success: false, message: 'Error deleting file' });
+        }
+        res.json({ success: true, message: `Deleted ${filename}` });
     });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({ 
-        success: false, 
-        message: 'Route not found' 
-    });
+app.delete('/api/codebase', (req, res) => {
+    try {
+        const files = fs.readdirSync(codebaseDir);
+        files.forEach(file => {
+            fs.unlinkSync(path.join(codebaseDir, file));
+        });
+        res.json({ success: true, message: "All files deleted from codebase" });
+    } catch (err) {
+        console.error("Error clearing codebase:", err);
+        res.status(500).json({ success: false, message: "Error clearing codebase" });
+    }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

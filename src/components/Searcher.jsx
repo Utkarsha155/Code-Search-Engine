@@ -6,7 +6,7 @@ function Searcher() {
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
-    const highlightText = (text, query) => {
+    const highlightText = (text = '', query = '') => {
         if (!query) return text;
         const regex = new RegExp(`(${query})`, 'gi');
         return text.replace(regex, '<mark class="bg-yellow-500 text-black px-1 rounded">$1</mark>');
@@ -14,26 +14,25 @@ function Searcher() {
 
     const handleSearch = async () => {
         if (!query.trim()) return;
-        
+
         setIsLoading(true);
         setHasSearched(true);
-        
+
         try {
             const response = await fetch(`http://localhost:5000/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
             setResults(data.results || []);
-            
-            // Save search to history
+
             const historyEntry = {
                 query: query,
                 time: new Date().toISOString(),
                 result: JSON.stringify(data.results || [])
             };
-            
+
             const existingHistory = JSON.parse(localStorage.getItem("searchHistory") || "[]");
             existingHistory.unshift(historyEntry);
             localStorage.setItem("searchHistory", JSON.stringify(existingHistory.slice(0, 50)));
-            
+
         } catch (error) {
             console.error('Search error:', error);
             setResults([]);
@@ -47,8 +46,6 @@ function Searcher() {
             handleSearch();
         }
     };
-
-    const queryWords = query.trim().toLowerCase().split(/\s+/);
 
     return (
         <div id="searcher" className="min-h-screen gradient-bg py-12 px-6">
@@ -78,7 +75,7 @@ function Searcher() {
                             />
                         </div>
                     </div>
-                    <button 
+                    <button
                         className="gradient-button text-white px-8 py-4 rounded-2xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleSearch}
                         disabled={isLoading || !query.trim()}
@@ -117,10 +114,10 @@ function Searcher() {
                                         </h2>
                                         <p className="text-gray-400">for "{query}"</p>
                                     </div>
-                                    
+
                                     <div className="space-y-4">
                                         {results.map((res, idx) => (
-                                            <div key={idx} className="result-card p-6 rounded-2xl slide-in" style={{animationDelay: `${idx * 0.1}s`}}>
+                                            <div key={idx} className="result-card p-6 rounded-2xl slide-in" style={{ animationDelay: `${idx * 0.1}s` }}>
                                                 <div className="flex items-center gap-3 mb-4">
                                                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
                                                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,9 +127,12 @@ function Searcher() {
                                                     <h3 className="font-bold text-lg text-blue-300">{res.file}</h3>
                                                 </div>
                                                 <div className="code-block">
-                                                    <pre className="text-sm text-green-300 leading-relaxed">
-                                                        {highlightText(res.snippet, queryWords)}
-                                                    </pre>
+                                                    <pre
+                                                        className="text-sm text-green-300 leading-relaxed whitespace-pre-wrap overflow-x-auto"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: highlightText(res.snippet || '', query)
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                         ))}
