@@ -6,9 +6,12 @@ function Codebase() {
     const [expandedFiles, setExpandedFiles] = useState(new Set());
     const [selectedFiles, setSelectedFiles] = useState([]);
 
+    const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
     const fetchCodebase = () => {
         setIsLoading(true);
-        fetch("http://localhost:5000/api/codebase")
+
+        fetch(`${API_BASE}/api/codebase`)
             .then(res => res.json())
             .then(data => {
                 setCodes(data);
@@ -36,13 +39,13 @@ function Codebase() {
             formData.append("files", file);
         });
 
-        await fetch("http://localhost:5000/api/upload", {
+        await fetch(`${API_BASE}/api/upload`, {
             method: "POST",
             body: formData
         });
 
         setSelectedFiles([]);
-        fetchCodebase(); 
+        fetchCodebase();
     };
 
 
@@ -50,9 +53,9 @@ function Codebase() {
         setExpandedFiles((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(idx)) {
-                newSet.delete(idx); 
+                newSet.delete(idx);
             } else {
-                newSet.add(idx); 
+                newSet.add(idx);
             }
             return newSet;
         });
@@ -120,14 +123,14 @@ function Codebase() {
         if (!window.confirm(`Are you sure you want to delete ${fileName}?`)) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/api/delete/${fileName}`, {
+            const res = await fetch(`${API_BASE}/api/delete/${fileName}`, {
                 method: "DELETE",
             });
 
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
-                fetchCodebase(); 
+                fetchCodebase();
             } else {
                 alert("Failed to delete file");
             }
@@ -140,14 +143,14 @@ function Codebase() {
         if (!window.confirm("⚠️ This will delete ALL files in your codebase. Continue?")) return;
 
         try {
-            const res = await fetch("http://localhost:5000/api/codebase", {
+            const res = await fetch(`${API_BASE}/api/codebase`, {
                 method: "DELETE",
             });
 
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
-                fetchCodebase(); 
+                fetchCodebase();
             } else {
                 alert("Failed to clear codebase");
             }
