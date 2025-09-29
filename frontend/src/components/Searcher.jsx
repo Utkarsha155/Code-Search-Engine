@@ -6,6 +6,8 @@ function Searcher() {
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
     const highlightText = (text = '', query = '') => {
         if (!query) return text;
         const regex = new RegExp(`(${query})`, 'gi');
@@ -19,7 +21,7 @@ function Searcher() {
         setHasSearched(true);
 
         try {
-            const response = await fetch(`http://localhost:5000/search?q=${encodeURIComponent(query)}`);
+            const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
             setResults(data.results || []);
 
