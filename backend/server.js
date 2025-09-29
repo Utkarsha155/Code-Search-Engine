@@ -19,10 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// // Serve frontend build if present (for single-deploy setups)
-// if (fs.existsSync(frontendDistDir)) {
-//     app.use(express.static(frontendDistDir));
-// }
+
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -145,13 +142,7 @@ app.delete('/api/codebase', (req, res) => {
     }
 });
 
-// // SPA fallback to index.html for any non-API route when serving frontend
-// if (fs.existsSync(frontendDistDir)) {
-//     app.get('*', (req, res, next) => {
-//         if (req.path.startsWith('/api')) return next();
-//         res.sendFile(path.join(frontendDistDir, 'index.html'));
-//     });
-// }
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
